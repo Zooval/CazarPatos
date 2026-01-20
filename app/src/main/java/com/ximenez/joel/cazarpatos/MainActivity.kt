@@ -1,211 +1,205 @@
 package com.ximenez.joel.cazarpatos
 
 import android.animation.ValueAnimator
-import android.os.Bundle
+import android.media.AudioAttributes
+import android.media.SoundPool
+import android.os.*
+import android.util.Log
+import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import android.media.AudioAttributes
-import android.media.SoundPool
-import android.os.CountDownTimer
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var textViewUser: TextView
     private lateinit var textViewCounter: TextView
     private lateinit var textViewTime: TextView
     private lateinit var imageViewDuck: ImageView
+
     private lateinit var soundPool: SoundPool
-    // Manejador para retrasar la restauración de la imagen original
+    private var soundId = 0
+    private var streamId = 0
+    private var isLoaded = false
+
     private val handler = Handler(Looper.getMainLooper())
     private var counter = 0
     private var screenWidth = 0
     private var screenHeight = 0
-    private var soundId: Int = 0
-    private var isLoaded = false
     private var gameOver = false
+
+    private lateinit var countDownTimer: CountDownTimer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        /*ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }*/
-        //Inicialización de variables
+
+        // Views
         textViewUser = findViewById(R.id.textViewUser)
         textViewCounter = findViewById(R.id.textViewCounter)
         textViewTime = findViewById(R.id.textViewTime)
         imageViewDuck = findViewById(R.id.imageViewDuck)
 
-        //Obtener el usuario de pantalla login
-        val extras = intent.extras ?: return
-        var usuario = extras.getString(EXTRA_LOGIN) ?:"Unknown"
-        textViewUser.setText(usuario)
-        //Determina el ancho y largo de pantalla
+        // Usuario (SIN cerrar la Activity)
+        val usuario = intent.getStringExtra(EXTRA_LOGIN) ?: "Unknown"
+        textViewUser.text = usuario
+
         initializeScreen()
-        //Cuenta regresiva del juego
+        initializeSound()
         initializeCountdown()
-        // Configuración del SoundPool
+
+        // Mover pato cuando la vista ya está lista
+        imageViewDuck.post {
+            moveDuck()
+        }
+
+        imageViewDuck.setOnClickListener {
+            if (gameOver) return@setOnClickListener
+
+            counter++
+            textViewCounter.text = counter.toString()
+
+            if (isLoaded) {
+                streamId = soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
+            }
+
+            imageViewDuck.setImageResource(R.drawable.duck_clicked)
+
+            handler.postDelayed({
+                imageViewDuck.setImageResource(R.drawable.duck)
+            }, 300)
+
+            moveDuck()
+        }
+    }
+
+    private fun initializeScreen() {
+        val metrics = resources.displayMetrics
+        screenWidth = metrics.widthPixels
+        screenHeight = metrics.heightPixels
+    }
+
+    private fun initializeSound() {
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
 
         soundPool = SoundPool.Builder()
+            .setMaxStreams(5)
             .setAudioAttributes(audioAttributes)
-            .setMaxStreams(10) // Puedes reproducir hasta 10 sonidos a la vez
             .build()
 
-        // Cargar el sonido
         soundId = soundPool.load(this, R.raw.gunshot, 1)
 
-        // Listener cuando el sonido está cargado
         soundPool.setOnLoadCompleteListener { _, _, _ ->
             isLoaded = true
         }
-        imageViewDuck.setOnClickListener {
-            if (gameOver) return@setOnClickListener
-            counter++
-            if (isLoaded) {
-                soundPool.play(soundId, 1f, 1f, 0, 0, 1f)
-            }
-            textViewCounter.setText(counter.toString())
-            imageViewDuck.setImageResource(R.drawable.duck_clicked)
-
-            // Restaurar la imagen original después de 500ms
-            handler.postDelayed({
-                imageViewDuck.setImageResource(R.drawable.duck)
-            }, 500)
-            moveDuck()
-        }
     }
-    private fun initializeScreen() {
-        // 1. Obtenemos el tamaño de la pantalla del dispositivo
-        val display = this.resources.displayMetrics
-        screenWidth = display.widthPixels
-        screenHeight = display.heightPixels
-    }
-    private fun moveDuck(){
-        when (Random.nextInt(3)) {
-            0 -> moveDuckRandomly()
-            1 -> moveDuckRandomlyWithAnimation()
-            2 -> moveDuckRandomlyWithParabola()
-        }
-    }
-    private fun moveDuckRandomly() {
-        val min = imageViewDuck.getWidth()/2
-        val maximoX = screenWidth - imageViewDuck.getWidth()
-        val maximoY = screenHeight - imageViewDuck.getHeight()
-        // Generamos 2 números aleatorios, para la coordenadas x , y
-        val randomX = Random.nextInt(0,maximoX - min + 1)
-        val randomY = Random.nextInt(0,maximoY - min + 1)
 
-        imageViewDuck.x = randomX.toFloat()
-        imageViewDuck.y = randomY.toFloat()
-    }
-    private fun moveDuckRandomlyWithAnimation() {
-        val min = imageViewDuck.getWidth()/2
-        val maximoX = screenWidth - imageViewDuck.getWidth()
-        val maximoY = screenHeight - imageViewDuck.getHeight()
-        // Generamos 2 números aleatorios, para la coordenadas x , y
-        val randomX = Random.nextInt(0,maximoX - min + 1)
-        val randomY = Random.nextInt(0,maximoY - min + 1)
-
-        imageViewDuck.animate()
-            .x(randomX.toFloat())
-            .y(randomY.toFloat())
-            .setDuration(300) // animación suave
-            .start()
-    }
-    private fun moveDuckRandomlyWithParabola() {
-        val maxX = screenWidth - imageViewDuck.width
-        val maxY = screenHeight  - imageViewDuck.height
-
-        if (maxX > 0 && maxY > 0) {
-            val startX = imageViewDuck.x
-            val startY = imageViewDuck.y
-
-            val endX = Random.nextInt(0, maxX).toFloat()
-            val endY = Random.nextInt(0, maxY).toFloat()
-
-            val duration = 300L
-
-            val animator = ValueAnimator.ofFloat(0f, 1f)
-            animator.duration = duration
-            animator.interpolator = LinearInterpolator()
-
-            animator.addUpdateListener { animation ->
-                val t = animation.animatedValue as Float
-
-                // Interpolación lineal en X
-                val currentX = startX + (endX - startX) * t
-
-                // Movimiento parabólico en Y: fórmula cuadrática invertida
-                val arcHeight = 300f // altura máxima de la parábola
-                val midT = t * (1 - t) * 4 // parábola que sube y baja
-
-                val currentY = startY + (endY - startY) * t - arcHeight * midT
-
-                imageViewDuck.x = currentX
-                imageViewDuck.y = currentY
-            }
-
-            animator.start()
-        }
-    }
-    private var countDownTimer = object : CountDownTimer(20000, 1000) {
-        override fun onTick(millisUntilFinished: Long) {
-            val secondsRemaining = millisUntilFinished / 1000
-            textViewTime.setText("${secondsRemaining}s")
-        }
-        override fun onFinish() {
-            textViewTime.setText("0s")
-            gameOver = true
-            showGameOverDialog()
-        }
-    }
     private fun initializeCountdown() {
+        countDownTimer = object : CountDownTimer(20000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                textViewTime.text = "${millisUntilFinished / 1000}s"
+            }
+
+            override fun onFinish() {
+                gameOver = true
+                textViewTime.text = "0s"
+                showGameOverDialog()
+            }
+        }
         countDownTimer.start()
     }
+
+    private fun moveDuck() {
+        when (Random.nextInt(3)) {
+            0 -> moveDuckRandom()
+            1 -> moveDuckAnimated()
+            2 -> moveDuckParabolic()
+        }
+    }
+
+    private fun moveDuckRandom() {
+        val maxX = screenWidth - imageViewDuck.width
+        val maxY = screenHeight - imageViewDuck.height
+
+        if (maxX > 0 && maxY > 0) {
+            imageViewDuck.x = Random.nextInt(0, maxX).toFloat()
+            imageViewDuck.y = Random.nextInt(0, maxY).toFloat()
+        }
+    }
+
+    private fun moveDuckAnimated() {
+        val maxX = screenWidth - imageViewDuck.width
+        val maxY = screenHeight - imageViewDuck.height
+
+        if (maxX > 0 && maxY > 0) {
+            imageViewDuck.animate()
+                .x(Random.nextInt(0, maxX).toFloat())
+                .y(Random.nextInt(0, maxY).toFloat())
+                .setDuration(300)
+                .start()
+        }
+    }
+
+    private fun moveDuckParabolic() {
+        val maxX = screenWidth - imageViewDuck.width
+        val maxY = screenHeight - imageViewDuck.height
+
+        if (maxX <= 0 || maxY <= 0) return
+
+        val startX = imageViewDuck.x
+        val startY = imageViewDuck.y
+        val endX = Random.nextInt(0, maxX).toFloat()
+        val endY = Random.nextInt(0, maxY).toFloat()
+
+        val animator = ValueAnimator.ofFloat(0f, 1f)
+        animator.duration = 300
+        animator.interpolator = LinearInterpolator()
+
+        animator.addUpdateListener {
+            val t = it.animatedValue as Float
+            val arc = 300f * 4 * t * (1 - t)
+
+            imageViewDuck.x = startX + (endX - startX) * t
+            imageViewDuck.y = startY + (endY - startY) * t - arc
+        }
+
+        animator.start()
+    }
+
     private fun showGameOverDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder
-            .setMessage(getString(R.string.dialog_message_congratulations, counter))
+        AlertDialog.Builder(this)
             .setTitle(getString(R.string.dialog_title_game_end))
+            .setMessage(getString(R.string.dialog_message_congratulations, counter))
+            .setCancelable(false)
             .setPositiveButton(getString(R.string.button_restart)) { _, _ ->
                 restartGame()
             }
             .setNegativeButton(getString(R.string.button_close)) { _, _ ->
-                // Dialog dismisses automatically
+                finish()
             }
-            .setCancelable(false)  // Prevents closing on outside click
-        builder.create().show()
+            .show()
     }
-    private fun restartGame(){
+
+    private fun restartGame() {
         counter = 0
         gameOver = false
-        countDownTimer.cancel()
-        textViewCounter.setText(counter.toString())
-        moveDuck()
+        textViewCounter.text = "0"
         initializeCountdown()
+        moveDuck()
     }
 
     override fun onStop() {
-        Log.w(EXTRA_LOGIN, "Play canceled")
-        countDownTimer.cancel()
-        textViewTime.text = "0s"
-        gameOver = true
-        soundPool.stop(soundId)
         super.onStop()
+        Log.w("MainActivity", "Game stopped")
+        countDownTimer.cancel()
+        if (streamId != 0) soundPool.stop(streamId)
     }
 
     override fun onDestroy() {
