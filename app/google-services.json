@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "748147583456",
+    "firebase_url": "https://proyectocazarpatos-4180c-default-rtdb.firebaseio.com",
+    "project_id": "proyectocazarpatos-4180c",
+    "storage_bucket": "proyectocazarpatos-4180c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748147583456:android:a4d6e3d0706b30975ee385",
+        "android_client_info": {
+          "package_name": "com.ximenez.joel.cazarpatos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0Az3ldpX4pRAEmjG5xGXK7SFDnKFuVCI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

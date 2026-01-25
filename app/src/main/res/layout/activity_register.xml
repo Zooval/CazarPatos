@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_game"
     android:padding="16dp"
-    tools:context=".LoginActivity">
+    tools:context=".RegisterActivity">
     <ImageView
         android:id="@+id/imageViewLogo"
         android:layout_width="0dp"
@@ -26,7 +26,7 @@
         android:ems="10"
         android:fontFamily="@font/press_start_2p"
         android:hint="@string/hint_email"
-        android:inputType="textPersonName"
+        android:inputType="textEmailAddress"
         android:minHeight="48dp"
         android:textColor="@android:color/white"
         android:textColorLink="@android:color/white"
@@ -43,7 +43,7 @@
         android:ems="10"
         android:fontFamily="@font/press_start_2p"
         android:hint="@string/hint_password"
-        android:inputType="numberPassword"
+        android:inputType="textPassword"
         android:minHeight="48dp"
         android:textColor="@android:color/white"
         android:textColorLink="@android:color/white"
@@ -52,31 +52,36 @@
         app:layout_constraintStart_toStartOf="@+id/editTextEmail"
         app:layout_constraintTop_toBottomOf="@+id/editTextEmail" />
 
-
-    <CheckBox
-        android:id="@+id/checkBoxRecordarme"
+    <EditText
+        android:id="@+id/editTextPassword2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/pixel"
-        android:text="@string/text_remember_me"
-        android:textColor="@color/colorAccent"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:fontFamily="@font/press_start_2p"
+        android:hint="@string/hint_password2"
+        android:inputType="textPassword"
+        android:minHeight="48dp"
+        android:textColor="@android:color/white"
+        android:textColorLink="@android:color/white"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="@+id/editTextPassword"
         app:layout_constraintStart_toStartOf="@+id/editTextPassword"
         app:layout_constraintTop_toBottomOf="@+id/editTextPassword" />
 
+
     <Button
-        android:id="@+id/buttonLogin"
+        android:id="@+id/buttonRegister"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/pixel"
         android:backgroundTint="@color/colorPrimaryDark"
-        android:text="@string/text_start_game"
+        android:text="@string/sign_up"
         android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="@+id/checkBoxRecordarme"
-        app:layout_constraintStart_toStartOf="@+id/checkBoxRecordarme"
-        app:layout_constraintTop_toBottomOf="@+id/checkBoxRecordarme" />
+        app:layout_constraintEnd_toEndOf="@+id/editTextPassword2"
+        app:layout_constraintStart_toStartOf="@+id/editTextPassword2"
+        app:layout_constraintTop_toBottomOf="@+id/editTextPassword2" />
 
     <Button
         android:id="@+id/buttonNewUser"
@@ -85,10 +90,10 @@
         android:layout_marginTop="16dp"
         android:fontFamily="@font/pixel"
         android:backgroundTint="@color/colorPrimaryLight"
-        android:text="@string/sign_up"
+        android:text="@string/back_to_login"
         android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="@+id/buttonLogin"
-        app:layout_constraintStart_toStartOf="@+id/buttonLogin"
-        app:layout_constraintTop_toBottomOf="@+id/buttonLogin" />
+        app:layout_constraintEnd_toEndOf="@+id/buttonRegister"
+        app:layout_constraintStart_toStartOf="@+id/buttonRegister"
+        app:layout_constraintTop_toBottomOf="@+id/buttonRegister" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
